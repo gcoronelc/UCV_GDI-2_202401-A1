@@ -1,0 +1,10 @@
+USE Northwind;
+GO
+
+CREATE VIEW V_VENTAS
+AS
+SELECT * FROM Orders;
+GO
+
+
+
