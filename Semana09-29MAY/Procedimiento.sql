@@ -1,5 +1,5 @@
 
-create procedure usp_ins_art
+alter procedure usp_ins_art
 (
 	@catego int,
 	@nombre varchar(35),
@@ -13,6 +13,7 @@ DECLARE
 	@CONTADOR INT, @PREFIJO CHAR(3);
 BEGIN
 	BEGIN TRY
+		-- Inicio de Tx
 		BEGIN TRANSACTION;
 		--VERIFICAR SI CATEGORIA EXISTE
 		SELECT @CONTADOR = COUNT(1)
@@ -35,19 +36,30 @@ BEGIN
 		-- Generar codigo del articulo
 		select @PREFIJO = Prefijo, @CONTADOR = ConCategoria
 		from Categoria where IdCategoria = @catego;
-		set @codigo = '00000' + @CONTADOR;
+		set @codigo = concat('00000',@CONTADOR);
 		set @codigo = @PREFIJO + RIGHT(@codigo,5)
 		-- Insertar el articulo
-
-
+		insert into Articulo(IdArticulo,IdCategoria,NomArticulo,PreArticulo)
+		values(@codigo,@catego,@nombre,@precio);
+		-- Confirmar Tx
 		COMMIT TRANSACTION;
+		set @estado = 1;
+		set @mensaje = 'El proceso se ejecuto correctamente.';
 	END TRY
 	BEGIN CATCH
 		ROLLBACK TRANSACTION;
-
 	END CATCH
 END;
 go
+
+declare @estado int, @mensaje varchar(200), @codigo varchar(8)
+exec usp_ins_art 11, 'Prueba', 80.0, @codigo output, @estado output, @mensaje output
+select @codigo, @estado, @mensaje;
+go
+
+
+
+
 
 SELECT * FROM Categoria;
 select * from Articulo;
